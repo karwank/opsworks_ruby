@@ -18,6 +18,10 @@ module Drivers
         end
       }
 
+      def self.passenger_supported?
+        true
+      end
+
       def settings
         output = node['defaults']['webserver'].merge(node['nginx']).merge(
           node['deploy'][app['shortname']]['webserver'] || {}
@@ -27,9 +31,20 @@ module Drivers
       end
 
       def setup
-        node.default['nginx']['install_method'] = out[:build_type].to_s == 'source' ? 'source' : 'package'
-        recipe = out[:build_type].to_s == 'source' ? 'source' : 'default'
-        context.include_recipe("chef_nginx::#{recipe}")
+        unless out[:build_type].to_s == 'phusionpassenger'
+          node.default['nginx']['install_method'] = out[:build_type].to_s == 'source' ? 'source' : 'package'
+          recipe = out[:build_type].to_s == 'source' ? 'source' : 'default'
+          context.include_recipe("chef_nginx::#{recipe}")
+        else
+          # do not use chef_nginx recipes for installation
+          context.execute "apt-get install -y nginx-extras passenger"
+          context.replace_or_add "Enable the Passenger Nginx module" do
+            path "/etc/nginx/nginx.conf"
+            pattern "# include /etc/nginx/passenger.conf;"
+            line "include /etc/nginx/passenger.conf;"
+            replace_only true
+          end
+        end
         define_service(:start)
       end
 
