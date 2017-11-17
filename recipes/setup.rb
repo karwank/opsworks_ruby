@@ -43,7 +43,6 @@ end
 if node['platform_family'] == 'debian'  
   execute 'add phusionpassenger' do
     command "apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 561F9B9CAC40B2F7 && apt-get install -y apt-transport-https ca-certificates && sh -c 'echo deb https://oss-binaries.phusionpassenger.com/apt/passenger xenial main > /etc/apt/sources.list.d/passenger.list' && apt-get update"
-    only_if { node['defaults']['webserver']['build_type'] == 'phusionpassenger' }
   end
 end
 

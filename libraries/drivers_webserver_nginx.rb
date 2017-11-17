@@ -73,6 +73,11 @@ module Drivers
       def service_name
         'nginx'
       end
+
+      def appserver_site_config_template(appserver_adapter)
+        "appserver.#{adapter}.#{appserver_adapter == 'passenger' ? 'passenger' : 'upstream'}.conf.erb"
+      end
+      
     end
   end
 end
